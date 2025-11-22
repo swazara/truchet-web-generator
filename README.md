@@ -1,2 +1,2 @@
 # truchet-web-generator
-Generador web interactivo de mosaicos de Truchet desarrollado en p5.js. Arquitectura modular JS con gestión de estado (History Stack), manipulación de portapapeles y sistema de probabilidades ponderadas. Migración de py5 y refactorización asistida por Gemini CLI / Antigravity.
+Interactive web-based Truchet mosaic designer and generator built with p5.js. Features modular JS architecture, state management (History Stack), clipboard manipulation, and a weighted probability system. Migrated from py5 with refactoring assisted by Gemini CLI / Antigravity.
