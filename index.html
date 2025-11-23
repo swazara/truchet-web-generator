@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truchet Mosaic Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="libraries/p5.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="app-header">
+                <span class="app-title">Truchet Generator</span>
+            </div>
+
+            <div class="controls-section">
+                <h2>Mode</h2>
+                <div class="toggle-container">
+                    <button id="btn-design" class="active">Design</button>
+                    <button id="btn-tiles">Tiles</button>
+                    <button id="btn-mosaic">Mosaic</button>
+                </div>
+            </div>
+
+            <div id="design-controls" class="controls-section">
+                <h2>Tile Management</h2>
+                <div class="control-group">
+                    <select id="tile-select"></select>
+                    <input type="text" id="tile-name" placeholder="Tile Name">
+                    <div class="button-grid">
+                        <button onclick="addNewTile()">New Tile</button>
+                        <button onclick="duplicateCurrentTile()">Duplicate</button>
+                        <button onclick="deleteCurrentTile()" class="danger">Delete</button>
+                    </div>
+                </div>
+
+                <h2>Tools</h2>
+                <div class="button-grid">
+                    <button onclick="addPoint()">Add Point</button>
+                    <button onclick="addQuad()">Add Quad</button>
+                    <button id="btn-add-bezier">Add Bezier</button>
+                    <button onclick="clearTile()" class="danger">Clear</button>
+                </div>
+
+                <h2>Style</h2>
+                <div class="control-group">
+                    <label>Stroke Weights</label>
+                    <div class="stroke-controls-row">
+                        <div class="stroke-control">
+                            <label class="sub-label">Primary</label>
+                            <div class="number-stepper">
+                                <button id="btn-stroke-minus" class="icon-btn">-</button>
+                                <input type="number" id="stroke-weight" min="1" value="50">
+                                <button id="btn-stroke-plus" class="icon-btn">+</button>
+                            </div>
+                        </div>
+                        <div class="stroke-control">
+                            <label class="sub-label">Secondary</label>
+                            <div class="number-stepper">
+                                <button id="btn-sec-stroke-minus" class="icon-btn">-</button>
+                                <input type="number" id="secondary-stroke-width" min="0" value="30">
+                                <button id="btn-sec-stroke-plus" class="icon-btn">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Colors (Primary / Secondary / Background)</label>
+                    <div class="color-row">
+                        <input type="color" id="color-primary" value="#14B8A6" title="Primary Color">
+                        <input type="color" id="color-secondary" value="#F97316" title="Secondary Color">
+                        <input type="color" id="color-background" value="#FEF3C7" title="Background Color">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Grid & Rendering</label>
+                    <div class="button-grid">
+                        <button id="btn-show-grid" class="toggle-btn active">Show Grid</button>
+                        <button id="btn-snap-grid" class="toggle-btn">Snap to Grid</button>
+                        <button id="btn-show-axes" class="toggle-btn">Show Axes</button>
+                        <button id="btn-layered-rendering" class="toggle-btn">Layered</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Grid Resolution: <input type="number" id="design-grid-resolution-input" value="10" min="2"
+                            max="50" step="1" style="width: 60px; margin-left: 10px;"></label>
+                    <div class="resolution-controls">
+                        <button id="btn-res-minus" class="icon-btn">-</button>
+                        <button id="btn-res-plus" class="icon-btn">+</button>
+                    </div>
+                </div>
+
+                <h2>Style Management</h2>
+                <div class="control-group">
+                    <select id="style-select">
+                        <option value="">Select a style...</option>
+                    </select>
+                    <input type="text" id="style-name" placeholder="Style Name">
+                    <div class="button-grid">
+                        <button onclick="saveStyle()">Save Style</button>
+                        <button onclick="loadStyle()">Load Style</button>
+                    </div>
+                </div>
+
+                <h2>Project Management</h2>
+                <div class="control-group">
+                    <input type="text" id="project-title" value="Truchet Mosaic" placeholder="Project Title">
+                    <div class="button-grid">
+                        <button onclick="newProject()">New Project</button>
+                        <button onclick="saveProject()">Save Project</button>
+                        <button onclick="document.getElementById('load-file').click()">Load Project</button>
+                        <input type="file" id="load-file" style="display: none" accept=".json"
+                            onchange="loadProjectFile(this)">
+                    </div>
+                </div>
+
+
+
+            </div>
+
+            <div id="mosaic-controls" class="controls-section hidden">
+                <h2>Grid Settings</h2>
+                <div class="control-group">
+                    <label>Grid Shape</label>
+                    <select id="grid-shape">
+                        <option value="square">Square (1:1)</option>
+                        <option value="horizontal">Horizontal (16:9)</option>
+                        <option value="vertical">Vertical (9:16)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Grid Size: <span id="grid-size-display">5</span></label>
+                    <input type="range" id="grid-size" min="2" max="20" value="5">
+                </div>
+                <div class="control-group">
+                    <label>Canvas Size</label>
+                    <select id="canvas-size">
+                        <option value="600">600px</option>
+                        <option value="800" selected>800px</option>
+                        <option value="1000">1000px</option>
+                        <option value="1200">1200px</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Seed: <span id="seed-display"></span></label>
+                </div>
+                <div class="button-grid">
+                    <button onclick="generateMosaic()">Randomize</button>
+                </div>
+
+                <h2>Export Options</h2>
+                <div class="control-group">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="composite-paths" checked>
+                        <label for="composite-paths"><strong>Composite Paths</strong></label>
+                    </div>
+                </div>
+                <div id="path-tolerance-container" class="control-group hidden">
+                    <label>Path Tolerance: <span id="path-tolerance-display">5</span>px</label>
+                    <input type="range" id="path-tolerance" min="0" max="30" value="5">
+                </div>
+                <div class="control-group">
+                    <label>Export Format</label>
+                    <select id="export-format">
+                        <option value="png">PNG</option>
+                        <option value="jpeg">JPEG</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Export Size (px)</label>
+                    <select id="export-size">
+                        <option value="1024">1024px</option>
+                        <option value="2048">2048px</option>
+                        <option value="4096">4096px</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div id="custom-size-inputs" class="control-group hidden">
+                    <label>Width (px)</label>
+                    <input type="number" id="export-width" value="1024">
+                    <label>Height (px)</label>
+                    <input type="number" id="export-height" value="1024">
+                </div>
+                <div class="control-group">
+                    <label>DPI</label>
+                    <input type="number" id="export-dpi" value="300">
+                </div>
+                <div class="button-grid">
+                    <button onclick="exportSVG()" class="accent">Export SVG</button>
+                    <button onclick="exportImage()" class="accent">Export Image</button>
+                </div>
+            </div>
+
+            <div id="tiles-controls" class="controls-section hidden">
+                <h2>Tile Probabilities</h2>
+                <div class="control-group">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="equiprobable-toggle" checked>
+                        <label for="equiprobable-toggle"><strong>Use Equal Probabilities</strong></label>
+                    </div>
+                </div>
+                <div id="tile-probabilities-container" class="control-group hidden"
+                    style="max-height: 150px; overflow-y: auto;">
+                    <!-- Probability inputs will be dynamically generated here -->
+                </div>
+
+                <h2>Select Tiles to Style</h2>
+                <div class="control-group">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="select-all-tiles">
+                        <label for="select-all-tiles"><strong>Select All</strong></label>
+                    </div>
+                    <div id="tile-checkboxes-container" style="max-height: 150px; overflow-y: auto;">
+                        <!-- Checkboxes will be dynamically generated here -->
+                    </div>
+                </div>
+
+                <h2>Style Editor</h2>
+                <div class="control-group">
+                    <label>Stroke Weights</label>
+                    <div class="stroke-controls-row">
+                        <div class="stroke-control">
+                            <label class="sub-label">Primary</label>
+                            <div class="number-stepper">
+                                <button id="btn-tiles-stroke-minus" class="icon-btn">-</button>
+                                <input type="number" id="tiles-stroke-weight" min="1" value="50">
+                                <button id="btn-tiles-stroke-plus" class="icon-btn">+</button>
+                            </div>
+                        </div>
+                        <div class="stroke-control">
+                            <label class="sub-label">Secondary</label>
+                            <div class="number-stepper">
+                                <button id="btn-tiles-sec-stroke-minus" class="icon-btn">-</button>
+                                <input type="number" id="tiles-secondary-stroke-width" min="0" value="30">
+                                <button id="btn-tiles-sec-stroke-plus" class="icon-btn">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Colors (Primary / Secondary / Background)</label>
+                    <div class="color-row">
+                        <input type="color" id="tiles-color-primary" value="#14B8A6" title="Primary Color">
+                        <input type="color" id="tiles-color-secondary" value="#F97316" title="Secondary Color">
+                        <input type="color" id="tiles-color-background" value="#FEF3C7" title="Background Color">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="tiles-layered-rendering">
+                        <label for="tiles-layered-rendering">Layered Rendering</label>
+                    </div>
+                </div>
+
+                <h2>Style Management</h2>
+                <div class="control-group">
+                    <label>Load Saved Style</label>
+                    <select id="tiles-style-select">
+                        <option value="">Select a style...</option>
+                    </select>
+                    <button onclick="loadStyleIntoTilesEditor()">Load Style</button>
+                </div>
+                <div class="control-group">
+                    <label>Save Current Style</label>
+                    <input type="text" id="tiles-style-name" placeholder="Style Name">
+                    <button onclick="saveStyleFromTilesEditor()">Save Style</button>
+                </div>
+
+                <h2>Apply Style Changes</h2>
+                <div class="button-grid">
+                    <button onclick="resetTilesPreview()">Reset</button>
+                    <button onclick="applyStylesToSelectedTiles()" class="accent">Apply</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="canvas-container">
+            <div id="canvas-wrapper"></div>
+        </main>
+    </div>
+
+    <script src="TileDesigner.js"></script>
+    <script src="MosaicGenerator.js"></script>
+    <script src="PathTracer.js"></script>
+    <script src="sketch.js"></script>
+</body>
+
+</html>
