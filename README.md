@@ -31,56 +31,8 @@ Interactive web-based Truchet mosaic designer and generator built with p5.js. Fe
 * **`PathTracer.js`**: **SVG Optimization**.
     * Converts tile shapes into continuous SVG paths for plotter/cutting support.
 
-## 4. Key Data Structures
 
-### The Tile Object (Source of Truth)
-```json
-{
-  "name": "Cross Tile",
-  "shapes": {
-    "points": [{ "x": 300, "y": 300 }],
-    "quads": [[ { "x": 0, "y": 0 }, { "x": 50, "y": 50 }, { "x": 100, "y": 0 } ]],
-    "beziers": [[ { "x": 0, "y": 0 }, { "x": 20, "y": 20 }, { "x": 80, "y": 20 }, { "x": 100, "y": 0 } ]]
-  },
-  "backgroundColor": "#FFFFFF",
-  "primaryColor": "#2E86C1",
-  "secondaryColor": "#E74C3C",
-  "strokeWeight": 5,
-  "secondaryStrokeWidth": 10,
-  "layeredRendering": false,
-  "probability": 1.0, // normalized internally
-  "history": [], 
-  "historyIndex": -1
-}
-```
-
-### The Style Object
-Shared between Design Mode and Tiles Mode repositories.
-```json
-{
-  "name": "Style Name",
-  "primaryColor": "#2E86C1",
-  "secondaryColor": "#E74C3C",
-  "backgroundColor": "#FFFFFF",
-  "strokeWeight": 5,
-  "secondaryStrokeWidth": 10,
-  "layeredRendering": false
-}
-```
-
-### The Project File (Save/Load)
-```json
-{
-  "projectTitle": "My Mosaic",
-  "tiles": [...],
-  "savedStyles": [...],
-  "compositePathsEnabled": true,
-  "pathTolerance": 5,
-  "timestamp": 1715420000
-}
-```
-
-## 5. Interactions & Controls
+## 4. Interactions & Controls
 
 ### Keyboard Shortcuts (`sketch.js`)
 * **Undo:** `Ctrl + Z`
@@ -89,42 +41,8 @@ Shared between Design Mode and Tiles Mode repositories.
 * **Paste:** `Ctrl + V`
 * **Delete:** `Delete` or `Supr`
 
-### Mouse Logic (`TileDesigner.js`)
-* **Selection:** Click on points/shapes. Highlighting uses visual accent color (#38bdf8).
-* **Dragging:** Click + Drag within 15px radius.
-* **Snap-to-Grid:** Active if toggled; snaps point coordinates to nearest grid interval.
-* **Release:** Commits change to History Stack.
 
-## 6. Critical Implementation Details
-
-### State Management (The "Buffer" Pattern)
-In **'Tiles' Mode**, we do NOT edit global `tiles` directly:
-1.  **`tilesOriginalState`**: Deep copy backup.
-2.  **`tilesPreviewState`**: Mutable copy for UI sliders/preview.
-3.  **Commit**: "Apply" pushes `tilesPreviewState` to global `tiles`.
-
-### Probability System
-* **Validation:** Prevents all tiles from having 0 probability.
-* **Logic:** If all weights are 0, it falls back to equiprobable selection.
-* **UI:** Sliders show real-time percentage (0-100%).
-
-### Rendering & Performance
-* **Layered Rendering:** Interweaves shapes (Secondary A -> Primary A -> Secondary B -> Primary B) for a "woven" look.
-* **Caching:** `PathTracer` caches segments. Cache invalidation triggers on: Tile style change, Size modification, or Mosaic regeneration.
-* **Preview Buffer:** Prevents global state pollution during bulk edits.
-
-### Export Pipeline
-* **Image (PNG/JPG):** Uses hidden canvas. Dimensions = User Size * (DPI/72).
-* **SVG (Tile-by-Tile):** Iterates grid, creating groups with transforms.
-* **SVG (Composite):** Uses `PathTracer` to stitch paths across tiles (fixed 100px reference size).
-
-## 7. Validations & Constraints
-1.  **Tile Names:** Cannot be empty.
-2.  **Styles:** Must have at least one tile selected to apply.
-3.  **Probabilities:** At least one tile must be > 0.
-4.  **History:** Only tracks changes in **Design Mode**. Tiles Mode changes are destructive unless "Cancel" is used.
-
-## 8. Current Feature Status
+## 5. Current Feature Status
 * [x] Design Mode (Add/Move shapes, Snap to Grid).
 * [x] **History System:** Undo/Redo stack (Limit: 10 actions).
 * [x] **Clipboard:** Copy/Paste shapes within editor.
